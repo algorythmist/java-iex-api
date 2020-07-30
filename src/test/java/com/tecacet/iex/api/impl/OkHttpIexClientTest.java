@@ -12,7 +12,7 @@ class OkHttpIexClientTest {
 
     @Test
     void invalidToken() {
-        IexClient iexClient = new OkHttpIexClient("adx");
+        IexClient iexClient = IexClient.getInstance("ax");
         try {
             iexClient.getDelayedQuote("IBM");
             fail("Exception should be thrown");
