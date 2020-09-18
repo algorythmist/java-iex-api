@@ -6,9 +6,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tecacet.iex.api.IexClient;
 import com.tecacet.iex.api.Quote;
+import com.tecacet.iex.api.TokenSupplier;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -29,30 +33,29 @@ class QuoteWrapper {
 @Slf4j
 public class OkHttpIexClient implements IexClient {
 
-    private static final String URL_BATCH_BASE = "https://cloud.iexapis.com/stable/stock/market/batch";
+    private static final String URL_BASE = "https://cloud.iexapis.com/v1";
+    private static final String URL_BATCH_BASE = URL_BASE + "/stock/market/batch";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final OkHttpClient httpClient = new OkHttpClient();
-    private final String token;
-
+    private final TokenSupplier tokenSupplier;
 
     @Override
-    public Quote getDelayedQuote(String symbol) throws IOException {
+    public Quote getDelayedQuote(String symbol) {
         Map<String, Quote> quotes = getDelayedQuotes(symbol);
         return quotes.get(symbol);
     }
 
-
-
     @Override
-    public Map<String, Quote> getDelayedQuotes(String... sybmols) throws IOException {
-        String symbolsString = String.join(",", sybmols);
+    @SneakyThrows
+    public Map<String, Quote> getDelayedQuotes(String... symbols) {
+        String symbolsString = String.join(",", symbols);
         HttpUrl.Builder urlBuilder = HttpUrl.parse(URL_BATCH_BASE).newBuilder();
-        urlBuilder.addQueryParameter("token", token);
+        urlBuilder.addQueryParameter("token", tokenSupplier.getToken());
         urlBuilder.addQueryParameter("symbols", symbolsString);
         urlBuilder.addQueryParameter("types", "quote");
         String url = urlBuilder.build().toString();
-        log.info(url);
+        log.info("Calling {} for symbols {}", URL_BATCH_BASE, symbolsString);
 
         Request request = new Request.Builder().url(url).build();
         Response response = httpClient.newCall(request).execute();
