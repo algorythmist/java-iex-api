@@ -24,7 +24,6 @@ public class Quote {
     private BigDecimal low;
     private BigDecimal latestPrice;
 
-
     private Long volume;
     private Long latestVolume;
     private Long avgTotalVolume;
@@ -37,5 +36,5 @@ public class Quote {
     private BigDecimal peRatio;
 
     private boolean isUSMarketOpen;
-    //TODO: add the rest
+    //TODO: add the rest: iex properties
 }
